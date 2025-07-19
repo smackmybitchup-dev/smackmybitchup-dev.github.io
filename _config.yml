@@ -1,25 +1,3 @@
-permalink: /:year:month:day/:title
-url: https://smackmybitchup-dev.github.io/
-baseurl: /project
-
-# variables
-name: smackmybitchup-dev
-description: 
-google_verification: null
-
-
-# File management
-include: [".htaccess"]
-exclude: ["README.md", "LICENSE"]
-
-# Sass
-sass:
-  style: :compressed
-  sass_dir: _sass
-
-# Markdown
-markdown: kramdown
-kramdown:
-  input: GFM
-  syntax_highlighter_opts:
-    disable : true
+     remote_theme: h01000110/windows-95
+     plugins:
+       - jekyll-remote-theme
