@@ -1,23 +1,100 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My GitHub Website</title>
-  <!-- Other head elements like CSS links, meta tags go here -->
+  <title>My Awesome GitHub Website with BGM</title>
+  <!-- Basic character set definition -->
+  <meta charset="utf-8">
+  <!-- Viewport for responsive design -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- You can add your custom CSS styles here, or link to an external CSS file -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+    }
+    p {
+      color: #666;
+    }
+    .music-controls button {
+      padding: 10px 20px;
+      margin: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .music-controls button:hover {
+      background-color: #0056b3;
+    }
+  </style>
 </head>
 <body>
-  <h1>Welcome to my amazing website!</h1>
-  <p>Here's some content about my project.</p>
 
-  <!-- Place the audio tag here, or further down in the body -->
-  <audio autoplay loop muted playsinline id="bgm">
-    <source src="https://raw.githubusercontent.com/smackmybitchup-dev/bgm4web/main/Summerlove%20%28feat.%20Anabelle%29%20%28Scorccio%20Edit%29.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
-  </audio>
+  <h1>Welcome to my amazing GitHub Website!</h1>
+  <p>Enjoy the background music while you browse.</p>
 
-  <button onclick="document.getElementById('bgm').muted = false">Unmute Music</button>
+  <!-- This div contains the SoundCloud player and is set to be invisible -->
+  <div id="soundcloud-player-container" style="display:none;">
+    <!-- SoundCloud Embed Code -->
+    <iframe id="soundcloud-iframe" width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay"
+      src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/2133192867&color=%23ff5500&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true">
+    </iframe>
+    <!-- The div below is part of the standard SoundCloud embed, but hidden -->
+    <div style="font-size: 10px; color: #cccccc;line-break: anywhere;word-break: normal;overflow: hidden;white-space: nowrap;text-overflow: ellipsis; font-family: Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif;font-weight: 100;"><a href="https://soundcloud.com/brianna-carhart" title="Brianna Carhart" target="_blank" style="color: #cccccc; text-decoration: none;">Brianna Carhart</a> · <a href="https://soundcloud.com/brianna-carhart/castle-vein-from-ultrakill" title="Castle Vein (from ULTRAKILL)" target="_blank" style="color: #cccccc; text-decoration: none;">Castle Vein (from ULTRAKILL)</a></div>
+  </div>
 
-  <!-- Other body content, like more paragraphs, images, scripts, etc. -->
+  <!-- Music Controls -->
+  <div class="music-controls">
+    <button id="playPauseButton">Play Music</button>
+  </div>
+
+  <!-- SoundCloud Widget API script -->
+  <!-- This script allows you to control the embedded SoundCloud player via JavaScript -->
+  <script src="https://w.soundcloud.com/player/api.js"></script>
+  <script>
+    var widget; // Variable to hold the SoundCloud widget object
+    var iframeElement = document.getElementById('soundcloud-iframe'); // Get the iframe element
+
+    // Ensure the iframe exists and the API is loaded
+    if (iframeElement) {
+      widget = SC.Widget(iframeElement); // Initialize the SoundCloud widget API for the iframe
+
+      // Set the initial state of the play/pause button
+      widget.isPaused(function(paused) {
+        document.getElementById('playPauseButton').textContent = paused ? 'Play Music' : 'Pause Music';
+      });
+
+      // Event listener for the play/pause button
+      document.getElementById('playPauseButton').addEventListener('click', function() {
+        widget.toggle(); // Toggles play/pause state
+      });
+
+      // Optional: Listen for events to update the button text
+      widget.bind(SC.Widget.Events.PLAY, function() {
+        document.getElementById('playPauseButton').textContent = 'Pause Music';
+      });
+
+      widget.bind(SC.Widget.Events.PAUSE, function() {
+        document.getElementById('playPauseButton').textContent = 'Play Music';
+      });
+
+      // Optional: If autoplay fails, automatically unmute after a short delay (e.g., 2 seconds)
+      // This is sometimes used as a workaround but might still be blocked.
+      // setTimeout(function() {
+      //   widget.setVolume(100); // Set volume to 100% after delay
+      // }, 2000);
+
+    } else {
+      console.error("SoundCloud iframe element not found.");
+    }
+  </script>
 
 </body>
 </html>
-
