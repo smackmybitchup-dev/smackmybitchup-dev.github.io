@@ -1,15 +1,7 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <title>smackmybitchup-dev</title>
-</head>
-<body>
-  <h1>Welcome to my project!</h1>
-  <p>Here's some content.</p>
-
-  <audio autoplay loop>
-    <source src=https://github.com/smackmybitchup-dev/bgm4web type=audio/mp3>
-    Your browser does not support the audio element.
-  </audio>
-</body>
-</html>
+<p><audio id="loop-limited" controls="controls" autoplay style="width: 6em;height:20px;"><source src="https://github.com/smackmybitchup-dev/bgm4web.mp3" type="audio/ogg" /><source src="https://github.com/smackmybitchup-dev/bgm4web.mp3" type="audio/mpeg" /></audio><br />
+<script>
+var loopLimit = 5;
+var loopCounter = 0;
+document.getElementById('loop-limited').addEventListener('ended', function(){if (loopCounter < loopLimit){this.currentTime = 0;this.play();loopCounter++;}
+}, false);</script></p>
