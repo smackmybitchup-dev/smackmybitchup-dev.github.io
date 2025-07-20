@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Brianna's badass website</title>
+  <title>My Awesome GitHub Website with BGM</title>
   <!-- Basic character set definition -->
   <meta charset="utf-8">
   <!-- Viewport for responsive design -->
@@ -37,8 +37,8 @@
 </head>
 <body>
 
-  <h1>Welcome to my badass GitHub Website!</h1>
-  <p>Enjoy the badass background music while you browse.</p>
+  <h1>Welcome to my amazing GitHub Website!</h1>
+  <p>Enjoy the background music while you browse.</p>
 
   <!-- This div contains the SoundCloud player and is set to be invisible -->
   <div id="soundcloud-player-container" style="display:none;">
@@ -85,11 +85,11 @@
         document.getElementById('playPauseButton').textContent = 'Play Music';
       });
 
-      // Optional: If autoplay fails, automatically unmute after a short delay (e.g., 2 seconds)
-      // This is sometimes used as a workaround but might still be blocked.
-      // setTimeout(function() {
-      //   widget.setVolume(100); // Set volume to 100% after delay
-      // }, 2000);
+      // Loop the track when it finishes
+      widget.bind(SC.Widget.Events.FINISH, function() {
+        widget.seekTo(0); // Go to the beginning of the track
+        widget.play();    // Play the track
+      });
 
     } else {
       console.error("SoundCloud iframe element not found.");
