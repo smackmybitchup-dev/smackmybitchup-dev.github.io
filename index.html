@@ -24,9 +24,6 @@ title: My Awesome GitHub Website with BGM
     p {
       color: #fff; /* Ensure this color is visible against your theme's background */
     }
-    .music-controls {
-      margin-top: 20px;
-    }
     .music-controls button {
       padding: 10px 20px;
       margin: 10px;
@@ -41,28 +38,48 @@ title: My Awesome GitHub Website with BGM
       background-color: #0056b3;
     }
 
-    /* CSS to hide the HTML5 Audio player visually */
-    #background-music-player {
-        display: none; /* Hides the player controls completely */
+    /* --- IMPORTANT CSS TO HIDE THE SOUNDCLOUD IFRAME --- */
+    #soundcloud-player-container {
+      /* Position absolutely and set dimensions to effectively hide it off-screen,
+         but keep it functional for the JavaScript to interact with. */
+      position: absolute;
+      left: -9999px; /* Move it far off the screen to the left */
+      top: -9999px;  /* Move it far off the screen to the top */
+      width: 1px;    /* Make it extremely small */
+      height: 1px;   /* Make it extremely small */
+      overflow: hidden; /* Hide any overflow */
+      visibility: hidden; /* Ensure it's not visible */
+      display: block !important; /* Keep it as a block element so it can be rendered and controlled */
+      /* Note: display: none; can sometimes break iframe functionality in some browsers,
+         so absolute positioning off-screen is generally safer. */
+    }
+
+    /* Hide the SoundCloud attribution div that comes with the embed */
+    /* This targets the div that is a sibling immediately after the container div */
+    #soundcloud-player-container + div {
+      display: none;
     }
 
   </style>
   
-  <!-- No external JavaScript libraries like SoundCloud API are needed for this simple player. -->
-  <!-- Remove the SoundCloud Widget API script link from your layout if you're not using it elsewhere. -->
+  <!-- SoundCloud Widget API script - Crucial for the JavaScript to control the player -->
+  <!-- RECOMMENDED TO PUT THIS IN YOUR THEME'S _layouts/default.html <head> -->
+  <script src="https://w.soundcloud.com/player/api.js"></script>
 </head>
 <body>
 
   <h1>Welcome to my amazing GitHub Website!</h1>
   <p>Enjoy the background music while you browse.</p>
 
-  <!-- HTML5 Audio Player for background music -->
-  <!-- Autoplay is likely to be blocked by browsers until user interaction. -->
-  <audio id="background-music-player" loop preload="auto">
-    <!-- IMPORTANT: Replace 'my_background_track.mp3' with the actual filename of your audio -->
-    <source src="/assets/audio/my_background_track.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
-  </audio>
+  <!-- This div contains the SoundCloud player and is now hidden via CSS -->
+  <div id="soundcloud-player-container"> 
+    <!-- SoundCloud Embed Code for FunKay - Virtual Insanity -->
+    <iframe id="soundcloud-iframe" width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
+      src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/109111867&color=%23ff5500&auto_play=false&hide_related=false&show_comments=false&show_user=true&show_reposts=false&show_teaser=true">
+    </iframe>
+    <!-- The div below is part of the standard SoundCloud embed, and is now hidden via CSS -->
+    <div style="font-size: 10px; color: #cccccc;line-break: anywhere;word-break: normal;overflow: hidden;white-space: nowrap;text-overflow: ellipsis; font-family: Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif;font-weight: 100;"><a href="https://soundcloud.com/funkay" title="FunKay" target="_blank" style="color: #cccccc; text-decoration: none;">FunKay</a> · <a href="https://soundcloud.com/funkay/virtual-insanity" title="Virtual Insanity" target="_blank" style="color: #cccccc; text-decoration: none;">Virtual Insanity</a></div>
+  </div>
 
   <!-- Single Music control button -->
   <div class="music-controls">
@@ -71,53 +88,54 @@ title: My Awesome GitHub Website with BGM
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const backgroundMusicPlayer = document.getElementById('background-music-player');
+        const soundcloudIframe = document.getElementById('soundcloud-iframe');
         const playPauseButton = document.getElementById('playPauseButton');
-        let isPlaying = false;
+        let player;
 
-        // Set initial button text based on whether it's playing
-        // (Due to autoplay restrictions, it will likely start as 'Play Music')
-        if (backgroundMusicPlayer.paused) {
-            playPauseButton.textContent = 'Play Music';
-        } else {
-            playPauseButton.textContent = 'Pause Music';
-        }
+        if (typeof SC !== 'undefined' && SC.Widget) {
+            player = SC.Widget(soundcloudIframe);
 
-        // Update button text when the player state changes
-        backgroundMusicPlayer.addEventListener('play', function() {
-            playPauseButton.textContent = 'Pause Music';
-            isPlaying = true;
-            console.log('Music is playing.');
-        });
-
-        backgroundMusicPlayer.addEventListener('pause', function() {
-            playPauseButton.textContent = 'Play Music';
-            isPlaying = false;
-            console.log('Music is paused.');
-        });
-        
-        // Handle potential autoplay blocking
-        // This event might not fire in all browsers for direct HTML5 audio,
-        // but it's good to include for debugging.
-        backgroundMusicPlayer.addEventListener('autoplayfailed', function() {
-            console.warn('HTML5 Audio Autoplay Failed - User interaction required.');
-            isPlaying = false;
-            playPauseButton.textContent = 'Play Music';
-        });
-
-        // Toggle play/pause when the button is clicked
-        playPauseButton.addEventListener('click', function() {
-            if (backgroundMusicPlayer.paused) {
-                backgroundMusicPlayer.play().then(function() {
-                    console.log('Play initiated by user click.');
-                }).catch(function(error) {
-                    console.error('Error attempting to play audio:', error);
-                    // This error often means the browser still blocked it or there's an issue with the audio file.
+            player.bind(SC.Widget.Events.READY, function() {
+                console.log('SoundCloud Widget Ready');
+                // Check initial play state and update button
+                player.isPaused(function(isPaused) {
+                    if (isPaused) {
+                        playPauseButton.textContent = 'Play Music';
+                    } else {
+                        playPauseButton.textContent = 'Pause Music';
+                    }
                 });
-            } else {
-                backgroundMusicPlayer.pause();
-            }
-        });
+            });
+
+            // Update button text when the player state changes
+            player.bind(SC.Widget.Events.PLAY, function() {
+                playPauseButton.textContent = 'Pause Music';
+            });
+
+            player.bind(SC.Widget.Events.PAUSE, function() {
+                playPauseButton.textContent = 'Play Music';
+            });
+            
+            // Handle potential autoplay blocking (important for initial interaction)
+            player.bind(SC.Widget.Events.PLAY_FAIL, function() {
+                console.warn('SoundCloud Autoplay Failed - User interaction required.');
+                // Ensure button text reflects the paused state if autoplay is blocked
+                playPauseButton.textContent = 'Play Music'; 
+            });
+
+            // Toggle play/pause when the button is clicked
+            playPauseButton.addEventListener('click', function() {
+                if (player) {
+                    // This will attempt to play if paused, pause if playing.
+                    // This click is the essential 'user interaction' needed for browsers to allow audio playback.
+                    player.toggle(); 
+                }
+            });
+        } else {
+            console.error("SoundCloud Widget API (SC.Widget) not loaded. Playback will not function.");
+            playPauseButton.disabled = true; // Disable button if API isn't found
+            playPauseButton.textContent = 'Music Unavailable';
+        }
     });
   </script>
 
