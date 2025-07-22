@@ -38,46 +38,75 @@ title: My Awesome GitHub Website with BGM
       background-color: #0056b3;
     }
   </style>
+  
+  <!-- SoundCloud Widget API script - RECOMMENDED TO PUT THIS IN YOUR THEME'S _layouts/default.html <head> -->
+  <script src="https://w.soundcloud.com/player/api.js"></script>
 </head>
 <body>
 
   <h1>Welcome to my amazing GitHub Website!</h1>
   <p>Enjoy the background music while you browse.</p>
 
-  <!-- This div contains the SoundCloud player and is set to be invisible -->
-  <div id="soundcloud-player-container" style="display:none;">
+  <!-- This div contains the SoundCloud player and is now visible by default -->
+  <div id="soundcloud-player-container" style="display:block;"> 
     <!-- SoundCloud Embed Code -->
     <iframe id="soundcloud-iframe" width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay"
-      src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/2133192867&color=%23ff5500&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true">
+      src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/2133192867&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true">
     </iframe>
     <!-- The div below is part of the standard SoundCloud embed -->
     <div style="font-size: 10px; color: #cccccc;line-break: anywhere;word-break: normal;overflow: hidden;white-space: nowrap;text-overflow: ellipsis; font-family: Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif;font-weight: 100;"><a href="https://soundcloud.com/brianna-carhart" title="Brianna Carhart" target="_blank" style="color: #cccccc; text-decoration: none;">Brianna Carhart</a> · <a href="https://soundcloud.com/brianna-carhart/your-track-name" title="Your Track Name" target="_blank" style="color: #cccccc; text-decoration: none;">Your Track Name</a></div>
     <!-- Make sure the above link matches your track's URL -->
   </div>
 
-  <!-- Your music controls could go here if you want to make them visible -->
-  <!-- Example controls (currently hidden by the #soundcloud-player-container display:none) -->
+  <!-- Single Music control button -->
   <div class="music-controls">
-    <button onclick="playMusic()">Play Music</button>
-    <button onclick="pauseMusic()">Pause Music</button>
+    <button id="playPauseButton">Play Music</button>
   </div>
 
   <script>
-    // Simple JavaScript to control the hidden SoundCloud iframe
-    const soundcloudIframe = document.getElementById('soundcloud-iframe');
-    const player = SC.Widget(soundcloudIframe); // SC.Widget is provided by SoundCloud's player JS
+    // Ensure the SoundCloud Widget API is loaded before trying to use SC.Widget
+    // This script block should be placed after the iframe and after the api.js script is loaded.
+    document.addEventListener('DOMContentLoaded', function() {
+        const soundcloudIframe = document.getElementById('soundcloud-iframe');
+        const playPauseButton = document.getElementById('playPauseButton');
+        let player; // Declare player variable in a scope accessible to event listeners
 
-    function playMusic() {
-      player.play();
-    }
+        // Initialize the SoundCloud widget once it's ready
+        // SC.Widget is available after https://w.soundcloud.com/player/api.js is loaded
+        if (typeof SC !== 'undefined' && SC.Widget) {
+            player = SC.Widget(soundcloudIframe);
 
-    function pauseMusic() {
-      player.pause();
-    }
+            player.bind(SC.Widget.Events.READY, function() {
+                console.log('SoundCloud Widget Ready');
+                // You can add logic here to check if it's currently playing, etc.
+                player.isPaused(function(isPaused) {
+                    if (isPaused) {
+                        playPauseButton.textContent = 'Play Music';
+                    } else {
+                        playPauseButton.textContent = 'Pause Music';
+                    }
+                });
+            });
 
-    // You might need to add the SoundCloud widget API script if your theme doesn't include it.
-    // This often involves adding a <script src="https://w.soundcloud.com/player/api.js"></script>
-    // in your layout's <head> or before the </body> tag.
+            // Update button text when the player state changes
+            player.bind(SC.Widget.Events.PLAY, function() {
+                playPauseButton.textContent = 'Pause Music';
+            });
+
+            player.bind(SC.Widget.Events.PAUSE, function() {
+                playPauseButton.textContent = 'Play Music';
+            });
+            
+            // Toggle play/pause when the button is clicked
+            playPauseButton.addEventListener('click', function() {
+                if (player) { // Ensure the player is initialized
+                    player.toggle(); // The toggle method plays if paused, pauses if playing
+                }
+            });
+        } else {
+            console.error("SoundCloud Widget API (SC.Widget) not loaded.");
+        }
+    });
   </script>
 
 </body>
