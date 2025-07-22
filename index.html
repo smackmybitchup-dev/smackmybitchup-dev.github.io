@@ -24,6 +24,9 @@ title: My Awesome GitHub Website with BGM
     p {
       color: #fff; /* Ensure this color is visible against your theme's background */
     }
+    .music-controls {
+      margin-top: 20px;
+    }
     .music-controls button {
       padding: 10px 20px;
       margin: 10px;
@@ -38,26 +41,17 @@ title: My Awesome GitHub Website with BGM
       background-color: #0056b3;
     }
 
-    /* --- IMPORTANT CSS TO HIDE THE SOUNDCLOUD IFRAME --- */
-    #soundcloud-player-container {
-      /* Position absolutely and set dimensions to effectively hide it off-screen,
-         but keep it functional for the JavaScript to interact with. */
+    /* --- CSS TO HIDE THE SOUNDCLOUD IFRAME AND ITS ATTRIBUTION --- */
+    #hidden-soundcloud-player {
+      /* This div encapsulates the iframe and its attribution, hiding both */
       position: absolute;
-      left: -9999px; /* Move it far off the screen to the left */
-      top: -9999px;  /* Move it far off the screen to the top */
-      width: 1px;    /* Make it extremely small */
-      height: 1px;   /* Make it extremely small */
-      overflow: hidden; /* Hide any overflow */
-      visibility: hidden; /* Ensure it's not visible */
-      display: block !important; /* Keep it as a block element so it can be rendered and controlled */
-      /* Note: display: none; can sometimes break iframe functionality in some browsers,
-         so absolute positioning off-screen is generally safer. */
-    }
-
-    /* Hide the SoundCloud attribution div that comes with the embed */
-    /* This targets the div that is a sibling immediately after the container div */
-    #soundcloud-player-container + div {
-      display: none;
+      left: -9999px;
+      top: -9999px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      visibility: hidden;
+      display: block !important; /* Keep it as block for JS interaction */
     }
 
   </style>
@@ -71,17 +65,15 @@ title: My Awesome GitHub Website with BGM
   <h1>Welcome to my amazing GitHub Website!</h1>
   <p>Enjoy the background music while you browse.</p>
 
-  <!-- This div contains the SoundCloud player and is now hidden via CSS -->
-  <div id="soundcloud-player-container"> 
-    <!-- SoundCloud Embed Code for FunKay - Virtual Insanity -->
+  <!-- Hidden SoundCloud player and its attribution -->
+  <div id="hidden-soundcloud-player"> 
     <iframe id="soundcloud-iframe" width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
       src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/109111867&color=%23ff5500&auto_play=false&hide_related=false&show_comments=false&show_user=true&show_reposts=false&show_teaser=true">
     </iframe>
-    <!-- The div below is part of the standard SoundCloud embed, and is now hidden via CSS -->
-    <div style="font-size: 10px; color: #cccccc;line-break: anywhere;word-break: normal;overflow: hidden;white-space: nowrap;text-overflow: ellipsis; font-family: Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif;font-weight: 100;"><a href="https://soundcloud.com/funkay" title="FunKay" target="_blank" style="color: #cccccc; text-decoration: none;">FunKay</a> · <a href="https://soundcloud.com/funkay/virtual-insanity" title="Virtual Insanity" target="_blank" style="color: #cccccc; text-decoration: none;">Virtual Insanity</a></div>
+    <div><a href="https://soundcloud.com/funkay" title="FunKay" target="_blank">FunKay</a> · <a href="https://soundcloud.com/funkay/virtual-insanity" title="Virtual Insanity" target="_blank">Virtual Insanity</a></div>
   </div>
 
-  <!-- Single Music control button -->
+  <!-- Single Music control button - This should now be visible -->
   <div class="music-controls">
     <button id="playPauseButton">Play Music</button>
   </div>
@@ -97,7 +89,6 @@ title: My Awesome GitHub Website with BGM
 
             player.bind(SC.Widget.Events.READY, function() {
                 console.log('SoundCloud Widget Ready');
-                // Check initial play state and update button
                 player.isPaused(function(isPaused) {
                     if (isPaused) {
                         playPauseButton.textContent = 'Play Music';
@@ -107,7 +98,6 @@ title: My Awesome GitHub Website with BGM
                 });
             });
 
-            // Update button text when the player state changes
             player.bind(SC.Widget.Events.PLAY, function() {
                 playPauseButton.textContent = 'Pause Music';
             });
@@ -116,24 +106,19 @@ title: My Awesome GitHub Website with BGM
                 playPauseButton.textContent = 'Play Music';
             });
             
-            // Handle potential autoplay blocking (important for initial interaction)
             player.bind(SC.Widget.Events.PLAY_FAIL, function() {
                 console.warn('SoundCloud Autoplay Failed - User interaction required.');
-                // Ensure button text reflects the paused state if autoplay is blocked
                 playPauseButton.textContent = 'Play Music'; 
             });
 
-            // Toggle play/pause when the button is clicked
             playPauseButton.addEventListener('click', function() {
                 if (player) {
-                    // This will attempt to play if paused, pause if playing.
-                    // This click is the essential 'user interaction' needed for browsers to allow audio playback.
                     player.toggle(); 
                 }
             });
         } else {
             console.error("SoundCloud Widget API (SC.Widget) not loaded. Playback will not function.");
-            playPauseButton.disabled = true; // Disable button if API isn't found
+            playPauseButton.disabled = true; 
             playPauseButton.textContent = 'Music Unavailable';
         }
     });
