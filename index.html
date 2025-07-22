@@ -145,10 +145,10 @@ title: My Awesome GitHub Website with BGM
         const totalTimeSpan = document.getElementById('totalTime');
         
         let player;
-        let durationMs = 0; // Duration in milliseconds
+        let durationMs = 0;
         let isSeeking = false;
+        let autoplayBlocked = false; // Flag to track autoplay policy
 
-        // Helper function to format time (milliseconds to M:SS)
         function formatTime(milliseconds) {
             const totalSeconds = Math.floor(milliseconds / 1000);
             const minutes = Math.floor(totalSeconds / 60);
@@ -165,6 +165,8 @@ title: My Awesome GitHub Website with BGM
                     durationMs = ms;
                     totalTimeSpan.textContent = formatTime(durationMs);
                 });
+
+                // Check initial play state and update button
                 player.isPaused(function(isPaused) {
                     if (isPaused) {
                         playPauseButton.textContent = 'Play Music';
@@ -176,15 +178,25 @@ title: My Awesome GitHub Website with BGM
 
             player.bind(SC.Widget.Events.PLAY, function() {
                 playPauseButton.textContent = 'Pause Music';
+                autoplayBlocked = false; // Reset if play succeeds
             });
 
             player.bind(SC.Widget.Events.PAUSE, function() {
                 playPauseButton.textContent = 'Play Music';
             });
 
+            // Handle potential autoplay blocking
+            player.bind(SC.Widget.Events.PLAY_FAIL, function() {
+                console.warn('SoundCloud Autoplay Failed - User interaction required.');
+                autoplayBlocked = true;
+                playPauseButton.textContent = 'Play Music'; // Ensure button reflects state
+                // Optionally: Show a message to the user that they need to click to start audio
+            });
+
+
             // Update the seek bar as the song plays
             player.bind(SC.Widget.Events.PLAY_PROGRESS, function(data) {
-                if (!isSeeking) { // Only update if not currently dragging the thumb
+                if (!isSeeking && durationMs > 0) { // Only update if not seeking and duration is known
                     const progressPercent = (data.relativePosition * 100);
                     seekBarProgress.style.width = `${progressPercent}%`;
                     seekBarThumb.style.left = `${progressPercent}%`;
@@ -195,7 +207,8 @@ title: My Awesome GitHub Website with BGM
             // Toggle play/pause when the button is clicked
             playPauseButton.addEventListener('click', function() {
                 if (player) {
-                    player.toggle();
+                    // Always try to toggle. If autoplay was blocked, this will trigger the play.
+                    player.toggle(); 
                 }
             });
 
@@ -204,22 +217,27 @@ title: My Awesome GitHub Website with BGM
                 isSeeking = true;
                 handleSeek(e); // Handle initial click position
                 document.addEventListener('mousemove', handleSeek);
-                document.addEventListener('mouseup', function() {
+                document.addEventListener('mouseup', function(e) {
                     isSeeking = false;
                     document.removeEventListener('mousemove', handleSeek);
-                    // Seek the player to the position where mouseup occurred
+                    // Calculate seek position on mouseup
                     const containerRect = seekBarContainer.getBoundingClientRect();
                     const clickX = e.clientX - containerRect.left;
                     const seekPercent = Math.max(0, Math.min(1, clickX / containerRect.width));
-                    player.seekTo(durationMs * seekPercent);
+                    
+                    if (durationMs > 0) { // Only seek if duration is known
+                         player.seekTo(durationMs * seekPercent);
+                    }
+                   
                 }, { once: true }); // Remove mouseup listener after it fires once
             });
 
-            // Handle mouse movement for seeking
             function handleSeek(e) {
+                if (!durationMs > 0) return; // Don't allow seeking if duration isn't loaded yet
+
                 const containerRect = seekBarContainer.getBoundingClientRect();
                 const clickX = e.clientX - containerRect.left;
-                const seekPercent = Math.max(0, Math.min(1, clickX / containerRect.width));
+                const seekPercent = Math.max(0, Math.min(1, clickX / containerRect.width);
                 
                 // Update the visual progress bar and thumb
                 seekBarProgress.style.width = `${seekPercent * 100}%`;
@@ -231,6 +249,8 @@ title: My Awesome GitHub Website with BGM
 
         } else {
             console.error("SoundCloud Widget API (SC.Widget) not loaded.");
+            // Optionally disable the button if API fails to load
+            playPauseButton.disabled = true; 
         }
     });
   </script>
