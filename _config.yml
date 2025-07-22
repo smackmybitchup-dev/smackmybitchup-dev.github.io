@@ -1,3 +1,2 @@
-     remote_theme: queenkjuul/jekyll-98
-     plugins:
-       - jekyll-remote-theme
+# _config.yml
+remote_theme: queenkjuul/jekyll-98
