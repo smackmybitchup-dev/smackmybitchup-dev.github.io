@@ -41,9 +41,8 @@ title: My Awesome GitHub Website with BGM
       background-color: #0056b3;
     }
 
-    /* --- CSS TO HIDE THE SOUNDCLOUD IFRAME AND ITS ATTRIBUTION --- */
+    /* --- CSS TO HIDE THE SOUNDCLOUD IFRAME --- */
     #hidden-soundcloud-player {
-      /* This div encapsulates the iframe and its attribution, hiding both */
       position: absolute;
       left: -9999px;
       top: -9999px;
@@ -51,7 +50,7 @@ title: My Awesome GitHub Website with BGM
       height: 1px;
       overflow: hidden;
       visibility: hidden;
-      display: block !important; /* Keep it as block for JS interaction */
+      display: block !important;
     }
 
   </style>
@@ -73,7 +72,7 @@ title: My Awesome GitHub Website with BGM
     <div><a href="https://soundcloud.com/funkay" title="FunKay" target="_blank">FunKay</a> · <a href="https://soundcloud.com/funkay/virtual-insanity" title="Virtual Insanity" target="_blank">Virtual Insanity</a></div>
   </div>
 
-  <!-- Single Music control button - This should now be visible -->
+  <!-- Single Music control button -->
   <div class="music-controls">
     <button id="playPauseButton">Play Music</button>
   </div>
@@ -109,6 +108,12 @@ title: My Awesome GitHub Website with BGM
             player.bind(SC.Widget.Events.PLAY_FAIL, function() {
                 console.warn('SoundCloud Autoplay Failed - User interaction required.');
                 playPauseButton.textContent = 'Play Music'; 
+            });
+
+            // --- Loop Functionality ---
+            player.bind(SC.Widget.Events.FINISH, function() {
+                console.log('Track finished, restarting...');
+                player.play(); // Play the track again from the beginning
             });
 
             playPauseButton.addEventListener('click', function() {
