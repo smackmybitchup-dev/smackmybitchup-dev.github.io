@@ -37,67 +37,68 @@ title: My Awesome GitHub Website with BGM
     .music-controls button:hover {
       background-color: #0056b3;
     }
+    /* Style for the default HTML5 audio player */
+    audio {
+        width: 100%;
+        max-width: 500px; /* Adjust as needed */
+        margin: 20px auto;
+        display: block; /* Center the player */
+    }
   </style>
   
-  <!-- SoundCloud Widget API script - RECOMMENDED TO PUT THIS IN YOUR THEME'S _layouts/default.html <head> -->
-  <script src="https://w.soundcloud.com/player/api.js"></script>
+  <!-- The SoundCloud Widget API script is no longer needed for Google Drive audio, so it's removed. -->
+  <!-- <script src="https://w.soundcloud.com/player/api.js"></script> --> 
 </head>
 <body>
 
   <h1>Welcome to my amazing GitHub Website!</h1>
   <p>Enjoy the background music while you browse.</p>
 
-  <!-- This div contains the SoundCloud player and is now visible by default -->
-  <div id="soundcloud-player-container" style="display:block;"> 
-    <!-- SoundCloud Embed Code for Virtual Insanity -->
-    <iframe id="soundcloud-iframe" width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
-      src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/261488824&color=%23ff5500&auto_play=false&hide_related=false&show_comments=false&show_user=true&show_reposts=false&show_teaser=true">
-    </iframe>
-    <div style="font-size: 10px; color: #cccccc;line-break: anywhere;word-break: normal;overflow: hidden;white-space: nowrap;text-overflow: ellipsis; font-family: Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif;font-weight: 100;"><a href="https://soundcloud.com/jamiroquai" title="Jamiroquai" target="_blank" style="color: #cccccc; text-decoration: none;">Jamiroquai</a> · <a href="https://soundcloud.com/jamiroquai/virtual-insanity" title="Virtual Insanity" target="_blank" style="color: #cccccc; text-decoration: none;">Virtual Insanity</a></div>
-  </div>
+  <!-- HTML5 Audio Player using Google Drive hosted file -->
+  <!-- Replace YOUR_GOOGLE_DRIVE_DIRECT_LINK.mp3 with the actual direct link -->
+  <audio controls preload="metadata" id="myAudioPlayer">
+    <source src="https://docs.google.com/uc?export=open&id=1ymDeuaysSnFNB1tw5p9yZGTXalqHa808" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
 
-  <!-- Single Music control button -->
+  <!-- Single Music control button - this will control the HTML5 <audio> tag -->
   <div class="music-controls">
     <button id="playPauseButton">Play Music</button>
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const soundcloudIframe = document.getElementById('soundcloud-iframe');
-        const playPauseButton = document.getElementById('playPauseButton');
-        let player;
+    const myAudioPlayer = document.getElementById('myAudioPlayer');
+    const playPauseButton = document.getElementById('playPauseButton');
+    
+    let isPlaying = false; // Track the current state
 
-        if (typeof SC !== 'undefined' && SC.Widget) {
-            player = SC.Widget(soundcloudIframe);
+    // Set initial button text based on whether it's playing
+    if (myAudioPlayer.paused) {
+        playPauseButton.textContent = 'Play Music';
+    } else {
+        playPauseButton.textContent = 'Pause Music';
+    }
 
-            player.bind(SC.Widget.Events.READY, function() {
-                console.log('SoundCloud Widget Ready');
-                player.isPaused(function(isPaused) {
-                    if (isPaused) {
-                        playPauseButton.textContent = 'Play Music';
-                    } else {
-                        playPauseButton.textContent = 'Pause Music';
-                    }
-                });
-            });
+    // Update button text when the player state changes
+    myAudioPlayer.addEventListener('play', function() {
+        playPauseButton.textContent = 'Pause Music';
+        isPlaying = true;
+    });
 
-            player.bind(SC.Widget.Events.PLAY, function() {
-                playPauseButton.textContent = 'Pause Music';
-            });
+    myAudioPlayer.addEventListener('pause', function() {
+        playPauseButton.textContent = 'Play Music';
+        isPlaying = false;
+    });
 
-            player.bind(SC.Widget.Events.PAUSE, function() {
-                playPauseButton.textContent = 'Play Music';
-            });
-            
-            playPauseButton.addEventListener('click', function() {
-                if (player) {
-                    player.toggle();
-                }
-            });
+    // Toggle play/pause when the button is clicked
+    playPauseButton.addEventListener('click', function() {
+        if (myAudioPlayer.paused) {
+            myAudioPlayer.play();
         } else {
-            console.error("SoundCloud Widget API (SC.Widget) not loaded.");
+            myAudioPlayer.pause();
         }
     });
+
   </script>
 
 </body>
