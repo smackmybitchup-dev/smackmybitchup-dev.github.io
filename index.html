@@ -1,5 +1,6 @@
 ---
 layout: default
+title: My Awesome GitHub Website with BGM
 ---
 <!DOCTYPE html>
 <html>
@@ -18,10 +19,10 @@ layout: default
       text-align: center;
     }
     h1 {
-      color: #355;
+      color: #355; /* Ensure this color is visible against your theme's background */
     }
     p {
-      color: #fff;
+      color: #fff; /* Ensure this color is visible against your theme's background */
     }
     .music-controls button {
       padding: 10px 20px;
@@ -49,51 +50,35 @@ layout: default
     <iframe id="soundcloud-iframe" width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay"
       src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/2133192867&color=%23ff5500&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true">
     </iframe>
-    <!-- The div below is part of the standard SoundCloud embed, but hidden -->
-    <div style="font-size: 10px; color: #cccccc;line-break: anywhere;word-break: normal;overflow: hidden;white-space: nowrap;text-overflow: ellipsis; font-family: Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif;font-weight: 100;"><a href="https://soundcloud.com/brianna-carhart" title="Brianna Carhart" target="_blank" style="color: #cccccc; text-decoration: none;">Brianna Carhart</a> · <a href="https://soundcloud.com/brianna-carhart/castle-vein-from-ultrakill" title="Castle Vein (from ULTRAKILL)" target="_blank" style="color: #cccccc; text-decoration: none;">Castle Vein (from ULTRAKILL)</a></div>
+    <!-- The div below is part of the standard SoundCloud embed -->
+    <div style="font-size: 10px; color: #cccccc;line-break: anywhere;word-break: normal;overflow: hidden;white-space: nowrap;text-overflow: ellipsis; font-family: Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif;font-weight: 100;"><a href="https://soundcloud.com/brianna-carhart" title="Brianna Carhart" target="_blank" style="color: #cccccc; text-decoration: none;">Brianna Carhart</a> · <a href="https://soundcloud.com/brianna-carhart/your-track-name" title="Your Track Name" target="_blank" style="color: #cccccc; text-decoration: none;">Your Track Name</a></div>
+    <!-- Make sure the above link matches your track's URL -->
   </div>
 
-  <!-- Music Controls -->
+  <!-- Your music controls could go here if you want to make them visible -->
+  <!-- Example controls (currently hidden by the #soundcloud-player-container display:none) -->
   <div class="music-controls">
-    <button id="playPauseButton">Play Music</button>
+    <button onclick="playMusic()">Play Music</button>
+    <button onclick="pauseMusic()">Pause Music</button>
   </div>
 
-  <!-- SoundCloud Widget API script -->
-  <!-- This script allows you to control the embedded SoundCloud player via JavaScript -->
-  <script src="https://w.soundcloud.com/player/api.js"></script>
   <script>
-    var widget; // Variable to hold the SoundCloud widget object
-    var iframeElement = document.getElementById('soundcloud-iframe'); // Get the iframe element
+    // Simple JavaScript to control the hidden SoundCloud iframe
+    const soundcloudIframe = document.getElementById('soundcloud-iframe');
+    const player = SC.Widget(soundcloudIframe); // SC.Widget is provided by SoundCloud's player JS
 
-    // Ensure the iframe exists and the API is loaded
-    if (iframeElement) {
-      widget = SC.Widget(iframeElement); // Initialize the SoundCloud widget API for the iframe
-
-      // Set the initial state of the play/pause button
-      widget.isPaused(function(paused) {
-        document.getElementById('playPauseButton').textContent = paused ? 'Play Music' : 'Pause Music';
-      });
-
-      // Event listener for the play/pause button
-      document.getElementById('playPauseButton').addEventListener('click', function() {
-        widget.toggle(); // Toggles play/pause state
-      });
-
-      // Optional: Listen for events to update the button text
-      widget.bind(SC.Widget.Events.PLAY, function() {
-        document.getElementById('playPauseButton').textContent = 'Pause Music';
-      });
-
-      widget.bind(SC.Widget.Events.PAUSE, function() {
-        document.getElementById('playPauseButton').textContent = 'Play Music';
-      });
-
-      // Loop the track when it finishes
-      widget.bind(SC.Widget.Events.FINISH, function() {
-        widget.seekTo(0); // Go to the beginning of the track
-        widget.play();    // Play the track
-      });
-
-    } else {
-      console.error("SoundCloud iframe element not found.");
+    function playMusic() {
+      player.play();
     }
+
+    function pauseMusic() {
+      player.pause();
+    }
+
+    // You might need to add the SoundCloud widget API script if your theme doesn't include it.
+    // This often involves adding a <script src="https://w.soundcloud.com/player/api.js"></script>
+    // in your layout's <head> or before the </body> tag.
+  </script>
+
+</body>
+</html>
