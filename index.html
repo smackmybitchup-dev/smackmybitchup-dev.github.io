@@ -25,233 +25,96 @@ title: My Awesome GitHub Website with BGM
       color: #fff; /* Ensure this color is visible against your theme's background */
     }
     .music-controls {
-      display: flex; /* Use flexbox for button and seek bar */
-      justify-content: center;
-      align-items: center;
-      gap: 15px; /* Space between elements */
       margin-top: 20px;
-      max-width: 600px; /* Limit width of controls */
-      margin-left: auto;
-      margin-right: auto;
     }
     .music-controls button {
       padding: 10px 20px;
+      margin: 10px;
       background-color: #007bff;
       color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
       font-size: 16px;
-      flex-shrink: 0; /* Prevent button from shrinking */
     }
     .music-controls button:hover {
       background-color: #0056b3;
     }
 
-    /* --- SEEK BAR STYLES --- */
-    .seek-bar-container {
-      flex-grow: 1; /* Allows it to take up available space */
-      position: relative;
-      width: 100%;
-      height: 10px; /* Height of the bar */
-      background-color: #555;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .seek-bar-progress {
-      height: 100%;
-      width: 0%;
-      background-color: #ff5500; /* SoundCloud's orange */
-      border-radius: 5px;
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-    .seek-bar-thumb {
-      width: 16px; /* Size of the draggable circle */
-      height: 16px;
-      background-color: white;
-      border-radius: 50%;
-      position: absolute;
-      top: -3px; /* Center vertically on the bar */
-      left: 0%;
-      transform: translateX(-50%); /* Adjust to center the thumb over the progress */
-      cursor: grab;
-      box-shadow: 0 0 5px rgba(0,0,0,0.5);
-    }
-    .time-display {
-      color: #ccc;
-      font-size: 14px;
-      margin-top: 5px;
-      text-align: center;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    /* --- CSS TO HIDE THE SOUNDCLOUD IFRAME --- */
-    #soundcloud-player-container {
-      position: absolute;
-      left: -9999px;
-      top: -9999px;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      visibility: hidden;
-      display: block !important;
-    }
-    #soundcloud-player-container + div {
-      display: none;
+    /* CSS to hide the HTML5 Audio player visually */
+    #background-music-player {
+        display: none; /* Hides the player controls completely */
     }
 
   </style>
   
-  <!-- SoundCloud Widget API script - RECOMMENDED TO PUT THIS IN YOUR THEME'S _layouts/default.html <head> -->
-  <script src="https://w.soundcloud.com/player/api.js"></script>
+  <!-- No external JavaScript libraries like SoundCloud API are needed for this simple player. -->
 </head>
 <body>
 
   <h1>Welcome to my amazing GitHub Website!</h1>
   <p>Enjoy the background music while you browse.</p>
 
-  <!-- Hidden SoundCloud player -->
-  <div id="soundcloud-player-container"> 
-    <iframe id="soundcloud-iframe" width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
-      src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/109111867&color=%23ff5500&auto_play=false&hide_related=false&show_comments=false&show_user=true&show_reposts=false&show_teaser=true">
-    </iframe>
-    <div><a href="https://soundcloud.com/funkay" title="FunKay" target="_blank">FunKay</a> · <a href="https://soundcloud.com/funkay/virtual-insanity" title="Virtual Insanity" target="_blank">Virtual Insanity</a></div>
-  </div>
+  <!-- HTML5 Audio Player for background music -->
+  <!-- Note: Autoplay is likely to be blocked by browsers until user interaction. -->
+  <audio id="background-music-player" loop preload="auto">
+    <source src="https://docs.google.com/uc?export=open&id=1ymDeuaysSnFNB1tw5p9yZGTXalqHa808" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
 
-  <!-- Music controls with custom seek bar -->
+  <!-- Single Music control button -->
   <div class="music-controls">
     <button id="playPauseButton">Play Music</button>
-    <div class="seek-bar-container" id="seekBarContainer">
-      <div class="seek-bar-progress" id="seekBarProgress"></div>
-      <div class="seek-bar-thumb" id="seekBarThumb"></div>
-    </div>
-  </div>
-  <div class="time-display">
-    <span id="currentTime">0:00</span> / <span id="totalTime">0:00</span>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const soundcloudIframe = document.getElementById('soundcloud-iframe');
+        const backgroundMusicPlayer = document.getElementById('background-music-player');
         const playPauseButton = document.getElementById('playPauseButton');
-        const seekBarContainer = document.getElementById('seekBarContainer');
-        const seekBarProgress = document.getElementById('seekBarProgress');
-        const seekBarThumb = document.getElementById('seekBarThumb');
-        const currentTimeSpan = document.getElementById('currentTime');
-        const totalTimeSpan = document.getElementById('totalTime');
-        
-        let player;
-        let durationMs = 0;
-        let isSeeking = false;
-        let autoplayBlocked = false; // Flag to track autoplay policy
+        let isPlaying = false;
 
-        function formatTime(milliseconds) {
-            const totalSeconds = Math.floor(milliseconds / 1000);
-            const minutes = Math.floor(totalSeconds / 60);
-            const seconds = totalSeconds % 60;
-            return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-        }
-
-        if (typeof SC !== 'undefined' && SC.Widget) {
-            player = SC.Widget(soundcloudIframe);
-
-            player.bind(SC.Widget.Events.READY, function() {
-                console.log('SoundCloud Widget Ready');
-                player.getDuration(function(ms) {
-                    durationMs = ms;
-                    totalTimeSpan.textContent = formatTime(durationMs);
-                });
-
-                // Check initial play state and update button
-                player.isPaused(function(isPaused) {
-                    if (isPaused) {
-                        playPauseButton.textContent = 'Play Music';
-                    } else {
-                        playPauseButton.textContent = 'Pause Music';
-                    }
-                });
-            });
-
-            player.bind(SC.Widget.Events.PLAY, function() {
-                playPauseButton.textContent = 'Pause Music';
-                autoplayBlocked = false; // Reset if play succeeds
-            });
-
-            player.bind(SC.Widget.Events.PAUSE, function() {
-                playPauseButton.textContent = 'Play Music';
-            });
-
-            // Handle potential autoplay blocking
-            player.bind(SC.Widget.Events.PLAY_FAIL, function() {
-                console.warn('SoundCloud Autoplay Failed - User interaction required.');
-                autoplayBlocked = true;
-                playPauseButton.textContent = 'Play Music'; // Ensure button reflects state
-                // Optionally: Show a message to the user that they need to click to start audio
-            });
-
-
-            // Update the seek bar as the song plays
-            player.bind(SC.Widget.Events.PLAY_PROGRESS, function(data) {
-                if (!isSeeking && durationMs > 0) { // Only update if not seeking and duration is known
-                    const progressPercent = (data.relativePosition * 100);
-                    seekBarProgress.style.width = `${progressPercent}%`;
-                    seekBarThumb.style.left = `${progressPercent}%`;
-                    currentTimeSpan.textContent = formatTime(data.currentPosition);
-                }
-            });
-            
-            // Toggle play/pause when the button is clicked
-            playPauseButton.addEventListener('click', function() {
-                if (player) {
-                    // Always try to toggle. If autoplay was blocked, this will trigger the play.
-                    player.toggle(); 
-                }
-            });
-
-            // --- Seek Bar Functionality ---
-            seekBarContainer.addEventListener('mousedown', function(e) {
-                isSeeking = true;
-                handleSeek(e); // Handle initial click position
-                document.addEventListener('mousemove', handleSeek);
-                document.addEventListener('mouseup', function(e) {
-                    isSeeking = false;
-                    document.removeEventListener('mousemove', handleSeek);
-                    // Calculate seek position on mouseup
-                    const containerRect = seekBarContainer.getBoundingClientRect();
-                    const clickX = e.clientX - containerRect.left;
-                    const seekPercent = Math.max(0, Math.min(1, clickX / containerRect.width));
-                    
-                    if (durationMs > 0) { // Only seek if duration is known
-                         player.seekTo(durationMs * seekPercent);
-                    }
-                   
-                }, { once: true }); // Remove mouseup listener after it fires once
-            });
-
-            function handleSeek(e) {
-                if (!durationMs > 0) return; // Don't allow seeking if duration isn't loaded yet
-
-                const containerRect = seekBarContainer.getBoundingClientRect();
-                const clickX = e.clientX - containerRect.left;
-                const seekPercent = Math.max(0, Math.min(1, clickX / containerRect.width);
-                
-                // Update the visual progress bar and thumb
-                seekBarProgress.style.width = `${seekPercent * 100}%`;
-                seekBarThumb.style.left = `${seekPercent * 100}%`;
-                
-                // Update current time display while dragging
-                currentTimeSpan.textContent = formatTime(durationMs * seekPercent);
-            }
-
+        // Set initial button text based on whether it's playing
+        // (Due to autoplay restrictions, it will likely start as 'Play Music')
+        if (backgroundMusicPlayer.paused) {
+            playPauseButton.textContent = 'Play Music';
         } else {
-            console.error("SoundCloud Widget API (SC.Widget) not loaded.");
-            // Optionally disable the button if API fails to load
-            playPauseButton.disabled = true; 
+            playPauseButton.textContent = 'Pause Music';
         }
+
+        // Update button text when the player state changes
+        backgroundMusicPlayer.addEventListener('play', function() {
+            playPauseButton.textContent = 'Pause Music';
+            isPlaying = true;
+            console.log('Music is playing.');
+        });
+
+        backgroundMusicPlayer.addEventListener('pause', function() {
+            playPauseButton.textContent = 'Play Music';
+            isPlaying = false;
+            console.log('Music is paused.');
+        });
+        
+        // Handle potential autoplay blocking
+        backgroundMusicPlayer.addEventListener('autoplayfailed', function() {
+            console.warn('Autoplay Failed - User interaction required.');
+            isPlaying = false;
+            playPauseButton.textContent = 'Play Music';
+        });
+
+        // Toggle play/pause when the button is clicked
+        playPauseButton.addEventListener('click', function() {
+            if (backgroundMusicPlayer.paused) {
+                backgroundMusicPlayer.play().then(function() {
+                    console.log('Play initiated by user.');
+                }).catch(function(error) {
+                    console.error('Error attempting to play audio:', error);
+                    // This often happens if the browser blocks play() even after interaction.
+                    // The autoplayfailed event listener should catch this, but it's a backup.
+                });
+            } else {
+                backgroundMusicPlayer.pause();
+            }
+        });
     });
   </script>
 
