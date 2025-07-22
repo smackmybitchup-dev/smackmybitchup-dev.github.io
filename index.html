@@ -24,19 +24,86 @@ title: My Awesome GitHub Website with BGM
     p {
       color: #fff; /* Ensure this color is visible against your theme's background */
     }
+    .music-controls {
+      display: flex; /* Use flexbox for button and seek bar */
+      justify-content: center;
+      align-items: center;
+      gap: 15px; /* Space between elements */
+      margin-top: 20px;
+      max-width: 600px; /* Limit width of controls */
+      margin-left: auto;
+      margin-right: auto;
+    }
     .music-controls button {
       padding: 10px 20px;
-      margin: 10px;
       background-color: #007bff;
       color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
       font-size: 16px;
+      flex-shrink: 0; /* Prevent button from shrinking */
     }
     .music-controls button:hover {
       background-color: #0056b3;
     }
+
+    /* --- SEEK BAR STYLES --- */
+    .seek-bar-container {
+      flex-grow: 1; /* Allows it to take up available space */
+      position: relative;
+      width: 100%;
+      height: 10px; /* Height of the bar */
+      background-color: #555;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .seek-bar-progress {
+      height: 100%;
+      width: 0%;
+      background-color: #ff5500; /* SoundCloud's orange */
+      border-radius: 5px;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    .seek-bar-thumb {
+      width: 16px; /* Size of the draggable circle */
+      height: 16px;
+      background-color: white;
+      border-radius: 50%;
+      position: absolute;
+      top: -3px; /* Center vertically on the bar */
+      left: 0%;
+      transform: translateX(-50%); /* Adjust to center the thumb over the progress */
+      cursor: grab;
+      box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    }
+    .time-display {
+      color: #ccc;
+      font-size: 14px;
+      margin-top: 5px;
+      text-align: center;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* --- CSS TO HIDE THE SOUNDCLOUD IFRAME --- */
+    #soundcloud-player-container {
+      position: absolute;
+      left: -9999px;
+      top: -9999px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      visibility: hidden;
+      display: block !important;
+    }
+    #soundcloud-player-container + div {
+      display: none;
+    }
+
   </style>
   
   <!-- SoundCloud Widget API script - RECOMMENDED TO PUT THIS IN YOUR THEME'S _layouts/default.html <head> -->
@@ -47,31 +114,57 @@ title: My Awesome GitHub Website with BGM
   <h1>Welcome to my amazing GitHub Website!</h1>
   <p>Enjoy the background music while you browse.</p>
 
-  <!-- This div contains the SoundCloud player and is now visible by default -->
-  <div id="soundcloud-player-container" style="display:block;"> 
-    <!-- SoundCloud Embed Code for FunKay - Virtual Insanity (Comments hidden) -->
+  <!-- Hidden SoundCloud player -->
+  <div id="soundcloud-player-container"> 
     <iframe id="soundcloud-iframe" width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
       src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/109111867&color=%23ff5500&auto_play=false&hide_related=false&show_comments=false&show_user=true&show_reposts=false&show_teaser=true">
     </iframe>
-    <div style="font-size: 10px; color: #cccccc;line-break: anywhere;word-break: normal;overflow: hidden;white-space: nowrap;text-overflow: ellipsis; font-family: Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif;font-weight: 100;"><a href="https://soundcloud.com/funkay" title="FunKay" target="_blank" style="color: #cccccc; text-decoration: none;">FunKay</a> · <a href="https://soundcloud.com/funkay/virtual-insanity" title="Virtual Insanity" target="_blank" style="color: #cccccc; text-decoration: none;">Virtual Insanity</a></div>
+    <div><a href="https://soundcloud.com/funkay" title="FunKay" target="_blank">FunKay</a> · <a href="https://soundcloud.com/funkay/virtual-insanity" title="Virtual Insanity" target="_blank">Virtual Insanity</a></div>
   </div>
 
-  <!-- Single Music control button -->
+  <!-- Music controls with custom seek bar -->
   <div class="music-controls">
     <button id="playPauseButton">Play Music</button>
+    <div class="seek-bar-container" id="seekBarContainer">
+      <div class="seek-bar-progress" id="seekBarProgress"></div>
+      <div class="seek-bar-thumb" id="seekBarThumb"></div>
+    </div>
+  </div>
+  <div class="time-display">
+    <span id="currentTime">0:00</span> / <span id="totalTime">0:00</span>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
         const soundcloudIframe = document.getElementById('soundcloud-iframe');
         const playPauseButton = document.getElementById('playPauseButton');
+        const seekBarContainer = document.getElementById('seekBarContainer');
+        const seekBarProgress = document.getElementById('seekBarProgress');
+        const seekBarThumb = document.getElementById('seekBarThumb');
+        const currentTimeSpan = document.getElementById('currentTime');
+        const totalTimeSpan = document.getElementById('totalTime');
+        
         let player;
+        let durationMs = 0; // Duration in milliseconds
+        let isSeeking = false;
+
+        // Helper function to format time (milliseconds to M:SS)
+        function formatTime(milliseconds) {
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
 
         if (typeof SC !== 'undefined' && SC.Widget) {
             player = SC.Widget(soundcloudIframe);
 
             player.bind(SC.Widget.Events.READY, function() {
                 console.log('SoundCloud Widget Ready');
+                player.getDuration(function(ms) {
+                    durationMs = ms;
+                    totalTimeSpan.textContent = formatTime(durationMs);
+                });
                 player.isPaused(function(isPaused) {
                     if (isPaused) {
                         playPauseButton.textContent = 'Play Music';
@@ -88,12 +181,54 @@ title: My Awesome GitHub Website with BGM
             player.bind(SC.Widget.Events.PAUSE, function() {
                 playPauseButton.textContent = 'Play Music';
             });
+
+            // Update the seek bar as the song plays
+            player.bind(SC.Widget.Events.PLAY_PROGRESS, function(data) {
+                if (!isSeeking) { // Only update if not currently dragging the thumb
+                    const progressPercent = (data.relativePosition * 100);
+                    seekBarProgress.style.width = `${progressPercent}%`;
+                    seekBarThumb.style.left = `${progressPercent}%`;
+                    currentTimeSpan.textContent = formatTime(data.currentPosition);
+                }
+            });
             
+            // Toggle play/pause when the button is clicked
             playPauseButton.addEventListener('click', function() {
                 if (player) {
                     player.toggle();
                 }
             });
+
+            // --- Seek Bar Functionality ---
+            seekBarContainer.addEventListener('mousedown', function(e) {
+                isSeeking = true;
+                handleSeek(e); // Handle initial click position
+                document.addEventListener('mousemove', handleSeek);
+                document.addEventListener('mouseup', function() {
+                    isSeeking = false;
+                    document.removeEventListener('mousemove', handleSeek);
+                    // Seek the player to the position where mouseup occurred
+                    const containerRect = seekBarContainer.getBoundingClientRect();
+                    const clickX = e.clientX - containerRect.left;
+                    const seekPercent = Math.max(0, Math.min(1, clickX / containerRect.width));
+                    player.seekTo(durationMs * seekPercent);
+                }, { once: true }); // Remove mouseup listener after it fires once
+            });
+
+            // Handle mouse movement for seeking
+            function handleSeek(e) {
+                const containerRect = seekBarContainer.getBoundingClientRect();
+                const clickX = e.clientX - containerRect.left;
+                const seekPercent = Math.max(0, Math.min(1, clickX / containerRect.width));
+                
+                // Update the visual progress bar and thumb
+                seekBarProgress.style.width = `${seekPercent * 100}%`;
+                seekBarThumb.style.left = `${seekPercent * 100}%`;
+                
+                // Update current time display while dragging
+                currentTimeSpan.textContent = formatTime(durationMs * seekPercent);
+            }
+
         } else {
             console.error("SoundCloud Widget API (SC.Widget) not loaded.");
         }
