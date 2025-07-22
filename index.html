@@ -49,6 +49,7 @@ title: My Awesome GitHub Website with BGM
   </style>
   
   <!-- No external JavaScript libraries like SoundCloud API are needed for this simple player. -->
+  <!-- Remove the SoundCloud Widget API script link from your layout if you're not using it elsewhere. -->
 </head>
 <body>
 
@@ -56,9 +57,10 @@ title: My Awesome GitHub Website with BGM
   <p>Enjoy the background music while you browse.</p>
 
   <!-- HTML5 Audio Player for background music -->
-  <!-- Note: Autoplay is likely to be blocked by browsers until user interaction. -->
+  <!-- Autoplay is likely to be blocked by browsers until user interaction. -->
   <audio id="background-music-player" loop preload="auto">
-    <source src="https://docs.google.com/uc?export=open&id=1ymDeuaysSnFNB1tw5p9yZGTXalqHa808" type="audio/mpeg">
+    <!-- IMPORTANT: Replace 'my_background_track.mp3' with the actual filename of your audio -->
+    <source src="/assets/audio/my_background_track.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
 
@@ -95,8 +97,10 @@ title: My Awesome GitHub Website with BGM
         });
         
         // Handle potential autoplay blocking
+        // This event might not fire in all browsers for direct HTML5 audio,
+        // but it's good to include for debugging.
         backgroundMusicPlayer.addEventListener('autoplayfailed', function() {
-            console.warn('Autoplay Failed - User interaction required.');
+            console.warn('HTML5 Audio Autoplay Failed - User interaction required.');
             isPlaying = false;
             playPauseButton.textContent = 'Play Music';
         });
@@ -105,11 +109,10 @@ title: My Awesome GitHub Website with BGM
         playPauseButton.addEventListener('click', function() {
             if (backgroundMusicPlayer.paused) {
                 backgroundMusicPlayer.play().then(function() {
-                    console.log('Play initiated by user.');
+                    console.log('Play initiated by user click.');
                 }).catch(function(error) {
                     console.error('Error attempting to play audio:', error);
-                    // This often happens if the browser blocks play() even after interaction.
-                    // The autoplayfailed event listener should catch this, but it's a backup.
+                    // This error often means the browser still blocked it or there's an issue with the audio file.
                 });
             } else {
                 backgroundMusicPlayer.pause();
