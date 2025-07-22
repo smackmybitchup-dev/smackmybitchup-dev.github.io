@@ -11,5 +11,5 @@ edit log: Scratch that, I did everything fine it was a github problem, so I swit
 edit log: Okay since I had to add:
 ---
 layout: default
----
+---] (the brackets there to make it not think its a command)
 to get it to add my theme in the _config.yml so jekyll would recognize it.
