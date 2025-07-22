@@ -1,0 +1,51 @@
+---
+layout: default
+title: Play POOM!
+permalink: /poom/
+---
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Play POOM! - My GitHub Website</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #355; /* Ensure this color is visible against your theme's background */
+    }
+    /* Add any specific styles for your game page if needed */
+    .game-container {
+        max-width: 640px; /* Adjust based on iframe width */
+        margin: 20px auto;
+        border: 2px solid #333; /* Optional border around the game */
+        background-color: #000; /* Optional background color */
+        padding: 5px;
+    }
+    .game-container iframe {
+        display: block; /* Ensure it takes full width */
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Time to Play POOM!</h1>
+  <p>Enjoy this awesome PICO-8 game.</p>
+
+  <!-- Embed Code for POOM from itch.io -->
+  <!-- Adjust width and height as needed based on how you want it to appear -->
+  <div class="game-container">
+    <iframe frameborder="0" src="https://itch.io/embed/796677" width="552" height="167" allowfullscreen>
+      <a href="https://freds72.itch.io/poom">Play POOM by freds72, Paranoid Cactus</a>
+    </iframe>
+  </div>
+
+  <p><a href="/">Go back to the homepage</a></p>
+
+</body>
+</html>
