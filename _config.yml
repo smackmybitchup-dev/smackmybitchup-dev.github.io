@@ -1,21 +1,21 @@
-yaml
 remote_theme: queenkjuul/jekyll-98
 
-# You might also want to add some defaults,
-# especially if you have pages that aren't posts
-# and want them to use a specific layout.
-# This example sets a default layout of "default" for all files.
+# Set a default layout for all pages.
+# This ensures Jekyll processes your HTML files with the theme's layout.
 defaults:
   - scope:
-      path: "" # an empty string here means all files in the project
+      path: "" # Applies to all files in your repository
     values:
       layout: "default" 
 
-# If you're not adding your own social media links to _config.yml,
-# you might need to explicitly disable the theme's default social links
-# to avoid errors or unintended display.
+# Optional: Disable theme's default social links if you don't want them.
+# The jekyll-98 theme may include social icons by default.
+# You might need to explicitly disable them if you don't configure them yourself.
+# Refer to the theme's documentation on its GitHub repository for exact configuration options.
 jekyll-98:
   social_links:
     github: false
     youtube: false
     twitch: false
+    # Add other social media platforms here and set to false if you don't use them.
+    # Check the theme's default _config.yml or documentation for the full list.
